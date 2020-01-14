@@ -1,5 +1,7 @@
 # coding=utf-8
 import pickle as pickle
+from itertools import combinations
+
 import PIL.Image as Image
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,8 +22,8 @@ def patch_wordspotting():
     #plt.imshow(im_arr, cmap=cm.get_cmap('Greys_r'))
 
     # ------------------
-    step_size = 5
-    cell_size = 5
+    step_size = 15
+    cell_size = 15
     # ------------------
 
     selectSIFT(step_size,cell_size, im_arr)
@@ -64,11 +66,11 @@ def selectSIFT(step_size, cell_size, im_arr):
 
 
     # for testing
-    height = 800
+    #height = 600
 
     # -----------------
-    x_step = round(x_lenght / 8)
-    y_step = round(y_lenght / 4)
+    x_step = round(x_lenght / 1)
+    y_step = round(y_lenght / 1)
     # -----------------
 
     # ---------------
@@ -82,6 +84,10 @@ def selectSIFT(step_size, cell_size, im_arr):
     # Histogramm from Example word
     basic_desc_mask, _ = calc_patch(word_x1, word_y1, word_x2, word_y2, frames)
     compare_hist = np.bincount(labels[basic_desc_mask])
+
+    if len(compare_hist) != n_centroids:
+        complete = n_centroids - len(compare_hist)
+        compare_hist = np.insert(compare_hist, len(compare_hist), np.zeros(complete))
 
 
     # Iteration über das Dokument
@@ -105,12 +111,8 @@ def selectSIFT(step_size, cell_size, im_arr):
         print(y)
 
 
-    print(desc_list)
-
     # Transformation desc_list (Descriptoren) in Histogramme
     histogramm_list = calc_histogramms(desc_list, n_centroids)
-
-    print(histogramm_list)
 
     # Patches sortieren nach ähnlichkeit zum Anfragewort
     # Dict mit ()
@@ -137,6 +139,7 @@ def selectSIFT(step_size, cell_size, im_arr):
             # 2. diesen Eintrag aus Frames entnehemen
             # 3. Tuple bilden um es einfacher in der visualisierung darzustellen:  [x,y] --> (x,y)
             frames_xy.append(tuple(frames_list[best_patch_dict[i][0]][0]))
+    print(frames_xy)
     # ---------------------------------------------------------
 
 
