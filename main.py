@@ -20,8 +20,8 @@ def patch_wordspotting():
     #plt.imshow(im_arr, cmap=cm.get_cmap('Greys_r'))
 
     # ------------------
-    step_size = 5
-    cell_size = 5
+    step_size = 15
+    cell_size = 15
     # ------------------
 
     selectSIFT(step_size,cell_size, im_arr)
@@ -58,17 +58,17 @@ def selectSIFT(step_size, cell_size, im_arr):
     y = 300
 
     # Patchgröße
-    x_lenght = word_x2 - word_x1
-    y_lenght = word_y2 - word_y1
+    x_length = word_x2 - word_x1
+    y_length = word_y2 - word_y1
     # -------------------
 
 
     # for testing
-    height = 800
+    height = 3310
 
     # -----------------
-    x_step = round(x_lenght / 8)
-    y_step = round(y_lenght / 4)
+    x_step = round(x_length/2)
+    y_step = round(y_length)
     # -----------------
 
     # ---------------
@@ -87,9 +87,9 @@ def selectSIFT(step_size, cell_size, im_arr):
     # Iteration über das Dokument
     desc_list = []
     frames_list = []
-    while y < height - y_lenght:
-        while x < width - x_lenght :
-            desc_mask,frames_patch = calc_patch(x, y, x + x_lenght, y + y_lenght, frames)
+    while y < height - y_length:
+        while x < width - x_length:
+            desc_mask,frames_patch = calc_patch(x, y, x + x_length, y + y_length, frames)
             frames_list.append(frames_patch)
             desc_list.append(labels[desc_mask])
 
@@ -140,7 +140,7 @@ def selectSIFT(step_size, cell_size, im_arr):
     # ---------------------------------------------------------
 
 
-    draw_centroids(frames_list,desc_list,n_centroids,im_arr,cell_size,frames_xy,x_lenght,y_lenght)
+    draw_centroids(frames_list,desc_list,n_centroids,im_arr,cell_size,frames_xy,x_length,y_length)
 
 
 
