@@ -13,6 +13,8 @@ from visualisation import mk_histogramm
 from patch_calculation import calc_patch
 from patch_calculation import sort_patches
 from patch_calculation import calc_histogramms
+from patch_coordinate_helper import create_array_for_nms
+from non_maximum_suppression import suppress_non_maximum_patches
 
 
 def patch_wordspotting():
@@ -66,11 +68,11 @@ def selectSIFT(step_size, cell_size, im_arr):
 
 
     # for testing
-    height = 3310
+    height = 1000
 
     # -----------------
-    x_step = round(x_length/2)
-    y_step = round(y_length)
+    x_step = round(x_length/8)
+    y_step = round(y_length/2)
     # -----------------
 
     # ---------------
@@ -93,6 +95,7 @@ def selectSIFT(step_size, cell_size, im_arr):
     # Iteration über das Dokument
     desc_list = []
     frames_list = []
+
     while y < height - y_length:
         while x < width - x_length:
             desc_mask,frames_patch = calc_patch(x, y, x + x_length, y + y_length, frames)
@@ -116,16 +119,18 @@ def selectSIFT(step_size, cell_size, im_arr):
 
     # Patches sortieren nach ähnlichkeit zum Anfragewort
     # Dict mit ()
+    # [(index, distance),..]
     best_patch_dict = sort_patches(histogramm_list,compare_hist)
 
+    # TODO: überlappende Patches aussortieren und besten Auswählen (done - bk)
 
-    # TODO: überlappende Patches aussortieren und besten Auswählen
-
-    # TODO: Histogramme verleichen -> gibt es einen besseren Ansatz ?
-    #       -> der bisherige scheint etwas naiv
+    # TODO: cdist/cosine-> evaluation
 
     # TODO: Average Precision ermitteln
 
+    # Indizes von lokalen Maxima(beste Patches aus überlappendem Haufen) finden
+    nms_array = create_array_for_nms(best_patch_dict, frames_list, x_length, y_length)
+    maximum_patch_indices = suppress_non_maximum_patches(nms_array)
     # ---------------------------------------------------------
     # Visualisierung der besten Ergebnisse (Optional)
     # Erstellt einen Kasten um die besten Patches
@@ -133,15 +138,15 @@ def selectSIFT(step_size, cell_size, im_arr):
     visualize = True
     frames_xy = []
     if visualize:
-        show_ex = 10
+        show_ex = 20
         for i in range(0,show_ex):
             # 1. Beste Einträge aus dem Dict
             # 2. diesen Eintrag aus Frames entnehemen
             # 3. Tuple bilden um es einfacher in der visualisierung darzustellen:  [x,y] --> (x,y)
-            frames_xy.append(tuple(frames_list[best_patch_dict[i][0]][0]))
+            # frames_list an der Stelle nms_inds rausholen!
+            frames_xy.append(tuple(frames_list[best_patch_dict[maximum_patch_indices[i]][0]][0]))
     print(frames_xy)
     # ---------------------------------------------------------
-
 
     draw_centroids(frames_list,desc_list,n_centroids,im_arr,cell_size,frames_xy,x_length,y_length)
 
