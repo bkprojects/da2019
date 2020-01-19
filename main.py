@@ -56,6 +56,11 @@ def selectSIFT(step_size, cell_size, im_arr):
     #word_x2 = 567
     #word_y2 = 434
 
+    # 1263 1778 1430 1885 they
+    #word_x1 = 1263
+    #word_y1 = 1778
+    #word_x2 = 1430
+    #word_y2 = 1885
 
     # x/y value fürs iterieren
     x = 0
@@ -68,11 +73,11 @@ def selectSIFT(step_size, cell_size, im_arr):
 
 
     # for testing
-    height = 1000
+    height = 3310
 
     # -----------------
-    x_step = round(x_length/8)
-    y_step = round(y_length/2)
+    x_step = round(x_length/6)
+    y_step = round(y_length/4)
     # -----------------
 
     # ---------------
@@ -138,12 +143,11 @@ def selectSIFT(step_size, cell_size, im_arr):
     visualize = True
     frames_xy = []
     if visualize:
-        show_ex = 20
+        show_ex = 15
         for i in range(0,show_ex):
             # 1. Beste Einträge aus dem Dict
             # 2. diesen Eintrag aus Frames entnehemen
             # 3. Tuple bilden um es einfacher in der visualisierung darzustellen:  [x,y] --> (x,y)
-            # frames_list an der Stelle nms_inds rausholen!
             frames_xy.append(tuple(frames_list[best_patch_dict[maximum_patch_indices[i]][0]][0]))
     print(frames_xy)
     # ---------------------------------------------------------

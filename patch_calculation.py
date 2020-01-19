@@ -58,17 +58,15 @@ def sort_patches(histogramm_list, compare_hist):
     shaped_compare_hist = np.array(shaped_compare_list)
     #print(shaped_compare_hist)
     histogramm_list_np = np.array(histogramm_list)
-    #print(histogramm_list_np)
 
-    distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='euclidean')
-    #print('Distanz:')
-   # print(distance)
 
-    distance = distance[ :, :1]
-    #print(distance)
-
+    # Distanz mit L2-Norm(euclidian)
+    #distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='euclidean')
+    # Distanz mit cosine-similarity
+    distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='cosine')
+    distance = distance[:, :1]
     distance = distance.reshape(-1)
-    #print(distance)
+
 
     # Berechne, wie stark sich die Histogramme unterscheiden
     # Absolute werte um summieren zu können
