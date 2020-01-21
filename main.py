@@ -21,6 +21,7 @@ from spatial_pyramid_helper import calculate_spatial_pyramid_histogram
 
 
 def patch_wordspotting():
+    global gtp_document_content
     document_image_filename = '2700270.png'
     image = Image.open(document_image_filename)
     im_arr = np.asarray(image, dtype='float32')
@@ -38,6 +39,7 @@ def patch_wordspotting():
     split_gtp_doc = [a.split(' ') for a in split_gtp_doc]
     for i in range(len(split_gtp_doc)):
         gtp_words_arr.append(split_gtp_doc[i][4])
+    distinct_gtp_words = list(set(gtp_words_arr))
 
     # Erstellen des dictionaries
     gtp_dictionary = defaultdict(list)
