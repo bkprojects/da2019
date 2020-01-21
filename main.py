@@ -114,8 +114,12 @@ def selectSIFT(step_size, cell_size, im_arr, dict, word):
     # -----------------
 
     # ---------------
-    n_centroids = 512
+    n_centroids = 40
     # ---------------
+
+    # spatial parymid ? --------
+    result_with_sp = True
+    # --------------------------
 
     # kmeans über dem gesamten dokument
     _, labels = kmeans2(desc, n_centroids, iter=20, minit='points')
@@ -129,7 +133,8 @@ def selectSIFT(step_size, cell_size, im_arr, dict, word):
         complete = n_centroids - len(compare_hist)
         compare_hist = np.insert(compare_hist, len(compare_hist), np.zeros(complete))
 
-    compare_hist = calculate_spatial_pyramid_histogram(compare_hist)
+    if result_with_sp:
+        compare_hist = calculate_spatial_pyramid_histogram(compare_hist)
 
     xy_coords_list_for_frames = []
 
@@ -159,7 +164,9 @@ def selectSIFT(step_size, cell_size, im_arr, dict, word):
 
     # Transformation desc_list (Descriptoren) in Histogramme
     histogram_list = calc_histogramms(desc_list, n_centroids)
-    histogram_list = calculate_spatial_pyramid_histograms(histogram_list)
+
+    if result_with_sp:
+        histogram_list = calculate_spatial_pyramid_histograms(histogram_list)
 
 
     # Patches sortieren nach ähnlichkeit zum Anfragewort
@@ -167,17 +174,12 @@ def selectSIFT(step_size, cell_size, im_arr, dict, word):
     # [(index, distance),..]
     best_patch_list = sort_patches(histogram_list, compare_hist)
 
-    # TODO: überlappende Patches aussortieren und besten Auswählen (done - bk)
-
-    # TODO: cdist/cosine-> evaluation
-
-    # TODO: Average Precision ermitteln
 
     # Indizes von lokalen Maxima(beste Patches aus überlappendem Haufen) finden
     nms_array = create_array_for_nms(best_patch_list, frames_list, x_length, y_length)
     maximum_patch_indices = suppress_non_maximum_patches(nms_array)
 
-    # Berechnen der besten Patches
+    # Berechnen der besten Patches als koordinaten
     best_patch_after_nms = np.array(xy_coords_list_for_frames)[ np.array(best_patch_list)[np.array(maximum_patch_indices)][:,0].astype(int)]
 
 
@@ -197,14 +199,15 @@ def selectSIFT(step_size, cell_size, im_arr, dict, word):
     print(frames_xy)
     # ---------------------------------------------------------
 
-    draw_centroids(frames_list,desc_list,n_centroids,im_arr,cell_size,frames_xy,x_length,y_length)
 
+
+    #draw_centroids(frames_list,desc_list,n_centroids,im_arr,cell_size,frames_xy,x_length,y_length)
 
     # über alle patches
-    create_heatmap(im_arr, best_patch_list, x_length, y_length, xy_coords_list_for_frames, x_step, y_step)
+    #create_heatmap(im_arr, best_patch_list, x_length, y_length, xy_coords_list_for_frames, x_step, y_step)
 
-    # über nms patches
-    # create_heatmap(im_arr, best_patch_list, x_length, y_length, xy_coords_list_for_frames, x_step, y_step, maximum_patch_indices)
+    # über nms-patches
+    create_heatmap(im_arr, best_patch_list, x_length, y_length, xy_coords_list_for_frames, x_step, y_step, maximum_patch_indices)
 
 
 

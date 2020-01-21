@@ -88,13 +88,21 @@ def create_heatmap(im_arr, sorted_dict, x_l, y_l, xy_coords_list_for_frames, x_s
     print(inver_dict)
 
     sort_list = np.array(list(inver_dict.values()))
-    index = np.array(list(inver_dict.values()))
+    index = np.array(list(inver_dict.keys()))
 
     print(sort_list)
+    print(maximum_patch_indices)
+
+    iter = range(len(sort_list))
 
     if not maximum_patch_indices is None:
-        best_patch_list_ndarray = np.array(sorted_dict)
-        sort_list = sort_list[best_patch_list_ndarray[np.array(maximum_patch_indices)][:, 0].astype(int)]
+        #best_patch_list_ndarray = np.array(sorted_dict)
+        #sort_list = sort_list[index[np.array(maximum_patch_indices)].astype(int)]
+        #xy_coords_list_for_frames = best_patch_after_nms
+        iter = maximum_patch_indices
+        print(iter)
+
+        print(sort_list)
 
     heatmap = np.ones((3312, 2037))
 
@@ -105,7 +113,8 @@ def create_heatmap(im_arr, sorted_dict, x_l, y_l, xy_coords_list_for_frames, x_s
 
     xy_coords_list_for_frames = np.array(xy_coords_list_for_frames)
 
-    for i in range(len(sort_list)):
+
+    for i in iter:
         for y in range(xy_coords_list_for_frames[i, 1], xy_coords_list_for_frames[i, 1] + y_l + 1):
             for x in range(xy_coords_list_for_frames[i, 0], xy_coords_list_for_frames[i, 0] + x_l + 1):
                 if (not y >= 3310) and (not x >= 2035):
@@ -117,7 +126,7 @@ def create_heatmap(im_arr, sorted_dict, x_l, y_l, xy_coords_list_for_frames, x_s
 
     korr = (x_l / x_step) * (y_l / y_step) * (sort_list.min() + 1.)
 
-    plt.imshow(heatmap, cmap='jet', interpolation='sinc', alpha=0.7, vmin=heatmap.max() / 4, vmax=heatmap.max())
+    plt.imshow(heatmap, cmap='jet', interpolation='sinc', alpha=0.7, vmin=heatmap.max() / 2, vmax=heatmap.max())
 
     plt.show()
 
