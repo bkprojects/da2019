@@ -1,5 +1,6 @@
 # coding=utf-8
 import pickle as pickle
+from collections import defaultdict
 from itertools import combinations
 
 import PIL.Image as Image
@@ -24,6 +25,29 @@ def patch_wordspotting():
     image = Image.open(document_image_filename)
     im_arr = np.asarray(image, dtype='float32')
     #plt.imshow(im_arr, cmap=cm.get_cmap('Greys_r'))
+
+    # Auslesen des gtp Dokuments
+    gtp_filename = '2710271.gtp'
+    gtp_document = open(gtp_filename, "r")
+    if gtp_document.mode == 'r':
+        gtp_document_content = gtp_document.read()
+
+    # Aufsplitten der Wörter und Teilen von den Koordinaten
+    gtp_words_arr = []
+    split_gtp_doc = gtp_document_content.splitlines()
+    split_gtp_doc = [a.split(' ') for a in split_gtp_doc]
+    for i in range(len(split_gtp_doc)):
+        gtp_words_arr.append(split_gtp_doc[i][4])
+
+    # Erstellen des dictionaries
+    gtp_dictionary = defaultdict(list)
+    for i in range(len(gtp_words_arr)):
+        gtp_dictionary[gtp_words_arr[i]].append((int(split_gtp_doc[i][0]),
+                                                 int(split_gtp_doc[i][1]),
+                                                 int(split_gtp_doc[i][2]),
+                                                 int(split_gtp_doc[i][3])))
+    #print('Vorkommen von "the" ' + len(gtp_dictionary['the']))
+
 
     # ------------------
     step_size = 15
@@ -78,8 +102,8 @@ def selectSIFT(step_size, cell_size, im_arr):
     height = 3310
 
     # -----------------
-    x_step = round(x_length/6)
-    y_step = round(y_length/4)
+    x_step = round(x_length/2)
+    y_step = round(y_length/2)
     # -----------------
 
     # ---------------
