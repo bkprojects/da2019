@@ -15,6 +15,8 @@ from patch_calculation import sort_patches
 from patch_calculation import calc_histogramms
 from patch_coordinate_helper import create_array_for_nms
 from non_maximum_suppression import suppress_non_maximum_patches
+from spatial_pyramid_helper import calculate_spatial_pyramid_histograms
+from spatial_pyramid_helper import calculate_spatial_pyramid_histogram
 
 
 def patch_wordspotting():
@@ -96,6 +98,7 @@ def selectSIFT(step_size, cell_size, im_arr):
         complete = n_centroids - len(compare_hist)
         compare_hist = np.insert(compare_hist, len(compare_hist), np.zeros(complete))
 
+    compare_hist = calculate_spatial_pyramid_histogram(compare_hist)
 
     # Iteration über das Dokument
     desc_list = []
@@ -120,12 +123,13 @@ def selectSIFT(step_size, cell_size, im_arr):
 
 
     # Transformation desc_list (Descriptoren) in Histogramme
-    histogramm_list = calc_histogramms(desc_list, n_centroids)
+    histogram_list = calc_histogramms(desc_list, n_centroids)
+    histogram_list = calculate_spatial_pyramid_histograms(histogram_list)
 
     # Patches sortieren nach ähnlichkeit zum Anfragewort
     # Dict mit ()
     # [(index, distance),..]
-    best_patch_dict = sort_patches(histogramm_list,compare_hist)
+    best_patch_dict = sort_patches(histogram_list,compare_hist)
 
     # TODO: überlappende Patches aussortieren und besten Auswählen (done - bk)
 
