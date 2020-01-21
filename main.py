@@ -28,8 +28,19 @@ def patch_wordspotting():
     im_arr = np.asarray(image, dtype='float32')
     #plt.imshow(im_arr, cmap=cm.get_cmap('Greys_r'))
 
+    # ------------------
+    step_size = 15
+    cell_size = 15
+    # ------------------
+
+    gtp_dict = createDictionary()
+    selectSIFT(step_size,cell_size, im_arr, gtp_dict, 'the')
+    plt.show()
+
+
+def createDictionary():
     # Auslesen des gtp Dokuments
-    gtp_filename = '2710271.gtp'
+    gtp_filename = '2700270.gtp'
     gtp_document = open(gtp_filename, "r")
     if gtp_document.mode == 'r':
         gtp_document_content = gtp_document.read()
@@ -50,19 +61,14 @@ def patch_wordspotting():
                                                  int(split_gtp_doc[i][2]),
                                                  int(split_gtp_doc[i][3])))
     #print('Vorkommen von "the" ' + len(gtp_dictionary['the']))
+    return gtp_dictionary
 
+def getSelectedWordCoords(dict, word):
+    (x1, y1, x2, y2) = dict[word][0]
+    print(dict[word])
+    return x1, y1, x2, y2
 
-    # ------------------
-    step_size = 15
-    cell_size = 15
-    # ------------------
-
-    selectSIFT(step_size,cell_size, im_arr)
-    plt.show()
-
-
-
-def selectSIFT(step_size, cell_size, im_arr):
+def selectSIFT(step_size, cell_size, im_arr, dict, word):
 
     # Select Image and SIFT file
     pickle_densesift_fn = '2700270-full_dense-%d_sift-%d_descriptors.p' % (step_size, cell_size)
@@ -74,10 +80,8 @@ def selectSIFT(step_size, cell_size, im_arr):
 
     # -------------------
     # Selected word: -- 580 319 723 406 the --
-    word_x1 = 580
-    word_y1 = 319
-    word_x2 = 723
-    word_y2 = 406
+    word_x1, word_y1, word_x2, word_y2 = getSelectedWordCoords(dict, word)
+    print(word_x1, word_y1, word_x2, word_y2)
 
     # 436 330 567 434 for
     #word_x1 = 436
