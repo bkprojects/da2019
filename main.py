@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.cluster.vq import kmeans2
 from visualisation import draw_centroids
 from visualisation import mk_histogramm
+from visualisation import create_heatmap
 from patch_calculation import calc_patch
 from patch_calculation import sort_patches
 from patch_calculation import calc_histogramms
@@ -92,7 +93,7 @@ def selectSIFT(step_size, cell_size, im_arr):
 
     # x/y value fürs iterieren
     x = 0
-    y = 300
+    y = 0
 
     # Patchgröße
     x_length = word_x2 - word_x1
@@ -101,15 +102,15 @@ def selectSIFT(step_size, cell_size, im_arr):
 
 
     # for testing
-    height = 3310
+    #height = 1200
 
     # -----------------
-    x_step = round(x_length/2)
+    x_step = round(x_length/4)
     y_step = round(y_length/2)
     # -----------------
 
     # ---------------
-    n_centroids = 30
+    n_centroids = 512
     # ---------------
 
     # kmeans über dem gesamten dokument
@@ -126,6 +127,8 @@ def selectSIFT(step_size, cell_size, im_arr):
 
     compare_hist = calculate_spatial_pyramid_histogram(compare_hist)
 
+    xy_coords_list_for_frames = []
+
     # Iteration über das Dokument
     desc_list = []
     frames_list = []
@@ -140,6 +143,8 @@ def selectSIFT(step_size, cell_size, im_arr):
             x = x + x_step
             # ------------------
 
+            xy_coords_list_for_frames.append([x,y])
+
         # y-Step -----------
         x = 0
         y = y + y_step
@@ -152,10 +157,11 @@ def selectSIFT(step_size, cell_size, im_arr):
     histogram_list = calc_histogramms(desc_list, n_centroids)
     histogram_list = calculate_spatial_pyramid_histograms(histogram_list)
 
+
     # Patches sortieren nach ähnlichkeit zum Anfragewort
     # Dict mit ()
     # [(index, distance),..]
-    best_patch_dict = sort_patches(histogram_list,compare_hist)
+    best_patch_list = sort_patches(histogram_list, compare_hist)
 
     # TODO: überlappende Patches aussortieren und besten Auswählen (done - bk)
 
@@ -164,8 +170,13 @@ def selectSIFT(step_size, cell_size, im_arr):
     # TODO: Average Precision ermitteln
 
     # Indizes von lokalen Maxima(beste Patches aus überlappendem Haufen) finden
-    nms_array = create_array_for_nms(best_patch_dict, frames_list, x_length, y_length)
+    nms_array = create_array_for_nms(best_patch_list, frames_list, x_length, y_length)
     maximum_patch_indices = suppress_non_maximum_patches(nms_array)
+
+    # Berechnen der besten Patches
+    best_patch_after_nms = np.array(xy_coords_list_for_frames)[ np.array(best_patch_list)[np.array(maximum_patch_indices)][:,0].astype(int)]
+
+
     # ---------------------------------------------------------
     # Visualisierung der besten Ergebnisse (Optional)
     # Erstellt einen Kasten um die besten Patches
@@ -174,15 +185,22 @@ def selectSIFT(step_size, cell_size, im_arr):
     frames_xy = []
     if visualize:
         show_ex = 15
-        for i in range(0,show_ex):
+        for i in range(0, show_ex):
             # 1. Beste Einträge aus dem Dict
             # 2. diesen Eintrag aus Frames entnehemen
             # 3. Tuple bilden um es einfacher in der visualisierung darzustellen:  [x,y] --> (x,y)
-            frames_xy.append(tuple(frames_list[best_patch_dict[maximum_patch_indices[i]][0]][0]))
+            frames_xy.append(tuple(best_patch_after_nms[i]))
     print(frames_xy)
     # ---------------------------------------------------------
 
     draw_centroids(frames_list,desc_list,n_centroids,im_arr,cell_size,frames_xy,x_length,y_length)
+
+
+    # über alle patches
+    create_heatmap(im_arr, best_patch_list, x_length, y_length, xy_coords_list_for_frames, x_step, y_step)
+
+    # über nms patches
+    # create_heatmap(im_arr, best_patch_list, x_length, y_length, xy_coords_list_for_frames, x_step, y_step, maximum_patch_indices)
 
 
 

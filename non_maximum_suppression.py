@@ -13,7 +13,7 @@ def suppress_non_maximum_patches(patch_array):
     distances = patch_array[:, 4]
     # Check the math behind IoU for threshold: A(P1) = 100, A(P2) = 100,
     # Let area of intersection I(P1, P2) be 50 -> 50/(100+100-50) = 50 / 150 = 1/3 overlap
-    threshold = 0.5
+    threshold = 0.3
     areas = (x2 - x1) * (y2 - y1)
     # add [::-1] for highest values first if needed
     order = distances.argsort()

@@ -52,13 +52,12 @@ def sort_patches(histogramm_list, compare_hist):
 
     # shape anpassen -> damit hist_i - hist_compare gerechnet werden kann
     shaped_compare_list = np.array([compare_hist, ] * len(histogramm_list))
-   # print(compare_hist)
-   # print(shaped_compare_list)
+
     # Für berechnung in numpy Objekte bringen
     shaped_compare_hist = np.array(shaped_compare_list)
-    #print(shaped_compare_hist)
     histogramm_list_np = np.array(histogramm_list)
 
+    distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='euclidean')
 
     # Distanz mit L2-Norm(euclidian)
     #distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='euclidean')
@@ -66,7 +65,6 @@ def sort_patches(histogramm_list, compare_hist):
     distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='cosine')
     distance = distance[:, :1]
     distance = distance.reshape(-1)
-
 
     # Berechne, wie stark sich die Histogramme unterscheiden
     # Absolute werte um summieren zu können
@@ -87,7 +85,7 @@ def sort_patches(histogramm_list, compare_hist):
 
     # Sortieren nach kleinstem wert -> am ähnlichsten an stelle 0
     sort_dic = sorted(hist__lut.items(), key=lambda kv: kv[1], reverse=False)
-    print(sort_dic)
+
     return sort_dic
 
 
@@ -123,9 +121,4 @@ def calc_histogramms(desc_list,n_centroids):
     return histogramm_list
 
 
-
-def return_intersection(hist_1, hist_2):
-    minima = np.minimum(hist_1, hist_2)
-
-    return minima
 
