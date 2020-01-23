@@ -13,7 +13,7 @@ def create_array_for_nms(ranked_patches, frames_list, x_length, y_length):
         index = patch[0]
         x_left, y_top = frames_list[index][0]
         distance_value = patch[1]
-        print(distance_value)
+        #print(distance_value)
         x_right, y_bottom = calculate_bottom_right_coords(x_left, y_top, x_length, y_length)
         nms_array = np.append(nms_array, [x_left, y_top, x_right, y_bottom, distance_value])
 

@@ -51,36 +51,19 @@ def calc_patch(x1, y1, x2, y2, frames):
 def sort_patches(histogramm_list, compare_hist):
 
     # shape anpassen -> damit hist_i - hist_compare gerechnet werden kann
-    shaped_compare_list = np.array([compare_hist, ] * len(histogramm_list))
-
+    shaped_compare_hist = np.array([compare_hist, ] )
     # Für berechnung in numpy Objekte bringen
-    shaped_compare_hist = np.array(shaped_compare_list)
     histogramm_list_np = np.array(histogramm_list)
 
-    distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='euclidean')
 
     # Distanz mit L2-Norm(euclidian)
     #distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='euclidean')
     # Distanz mit cosine-similarity
+
+    print('Distanzberechnung...')
     distance = dist.cdist(histogramm_list_np, shaped_compare_hist, metric='cosine')
-    distance = distance[:, :1]
-    distance = distance.reshape(-1)
-
-    # Berechne, wie stark sich die Histogramme unterscheiden
-    # Absolute werte um summieren zu können
-    # (bei negativen Werten für das Ergebniss kleiner, also besser werden)
-    #diff_results = np.absolute(histogramm_list_np - shaped_compare_hist)
-
-
-    # Summiere die Differenz
-    # hohe Differenz -> Histogramme stark unterschiedlich
-    # niedrige Different -> ähnlichkeit vorhanden
-    #hist_sums = np.sum(diff_results, axis=1)
-    #print(hist_sums)
-
 
     # zur auswertung nach der sortierung ein LuT
-    #hist__lut = {index: v_word for index, v_word in enumerate(hist_sums, 0)}
     hist__lut = {index: v_word for index, v_word in enumerate(distance, 0)}
 
     # Sortieren nach kleinstem wert -> am ähnlichsten an stelle 0
@@ -94,13 +77,11 @@ def calc_histogramms(desc_list,n_centroids):
 
     # Transformation desc_list (Descriptoren) in Histogramme
     histogramm_list = np.ones(n_centroids, dtype=int)
-    #print(histogramm_list)
 
     for desc in desc_list:
 
         hist_temp = np.bincount(desc)
-        #print(hist_temp)
-        #print('Länge: ' + str(len(hist_temp)))
+
         # TODO: Warum kommt manchmal ein Histogramm mit n_centroids-1 raus ?
         # temporäre Lösung: Nullen füllen
         # Frage: ist das Histogramm dann verfälscht ?
@@ -110,13 +91,11 @@ def calc_histogramms(desc_list,n_centroids):
             hist_temp = np.insert(hist_temp, len(hist_temp), np.zeros(complete))
 
         histogramm_list = np.vstack((histogramm_list, hist_temp))
-        #print('vstack: ')
-        #print(histogramm_list)
+
 
 
     histogramm_list = np.delete(histogramm_list, 0, 0)
-    #print('delete: ')
-    #print(histogramm_list)
+
 
     return histogramm_list
 

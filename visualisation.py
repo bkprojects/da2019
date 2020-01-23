@@ -10,6 +10,33 @@ from matplotlib.patches import Circle, Rectangle
 import seaborn as sns
 
 
+def visualize_result(frames_list, desc_list, n_centroids, im_arr, cell_size, x_length, y_length,
+                        best_patch_list, xy_coords_list_for_frames, best_patch_after_nms, maximum_patch_indices, x_step, y_step):
+
+    # ---------------------------------------------------------
+    # Visualisierung der besten Ergebnisse (Optional)
+    # Erstellt einen Kasten um die besten Patches
+    # frames_xy wird dann als optionales Argument an visualisation übergeben
+    visualize = True
+    frames_xy = []
+    if visualize:
+        show_ex = 100
+        for i in range(0, show_ex):
+            # 1. Beste Einträge aus dem Dict
+            # 2. diesen Eintrag aus Frames entnehemen
+            # 3. Tuple bilden um es einfacher in der visualisierung darzustellen:  [x,y] --> (x,y)
+            frames_xy.append(tuple(best_patch_after_nms[i]))
+    # ---------------------------------------------------------
+
+    draw_centroids(frames_list, desc_list, n_centroids, im_arr, cell_size, frames_xy, x_length, y_length)
+
+    # über alle patches
+    create_heatmap(im_arr, best_patch_list, x_length, y_length, xy_coords_list_for_frames, x_step, y_step)
+
+    # über nms-patches
+    create_heatmap(im_arr, best_patch_list, x_length, y_length, xy_coords_list_for_frames, x_step, y_step, maximum_patch_indices)
+
+
 def draw_centroids(frames, labels, n_centroids, im_arr, cell_size, sorted_histograms_value=None, x_lenght=None,
                    y_length=None):
     # Was soll gezeichten werden ?
@@ -32,8 +59,14 @@ def draw_centroids(frames, labels, n_centroids, im_arr, cell_size, sorted_histog
             elif color_i < 6:
                 rect = Rectangle(x, x_lenght, y_length, linewidth=1, edgecolor='y', facecolor='none')
                 ax.add_patch(rect)
-            else:
+            elif color_i < 15:
+                rect = Rectangle(x, x_lenght, y_length, linewidth=1, edgecolor='magenta', facecolor='none')
+                ax.add_patch(rect)
+            elif color_i < 25:
                 rect = Rectangle(x, x_lenght, y_length, linewidth=1, edgecolor='r', facecolor='none')
+                ax.add_patch(rect)
+            else:
+                rect = Rectangle(x, x_lenght, y_length, linewidth=1, edgecolor='grey', facecolor='none')
                 ax.add_patch(rect)
             color_i += 1
 
@@ -74,8 +107,8 @@ def mk_histogramm(labels, n_centroids):
     plt.show()
 
 
-def create_heatmap(im_arr, sorted_dict, x_l, y_l, xy_coords_list_for_frames, x_step, y_step, maximum_patch_indices=None):
-
+def create_heatmap(im_arr, sorted_dict, x_l, y_l, xy_coords_list_for_frames, x_step, y_step,
+                   maximum_patch_indices=None):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -83,26 +116,12 @@ def create_heatmap(im_arr, sorted_dict, x_l, y_l, xy_coords_list_for_frames, x_s
 
     inver_dict = {x: y for x, y in sorted_dict}
 
-
-
-    print(inver_dict)
-
     sort_list = np.array(list(inver_dict.values()))
-    index = np.array(list(inver_dict.keys()))
 
-    print(sort_list)
-    print(maximum_patch_indices)
-
-    iter = range(len(sort_list))
+    iter_elements = range(len(sort_list))
 
     if not maximum_patch_indices is None:
-        #best_patch_list_ndarray = np.array(sorted_dict)
-        #sort_list = sort_list[index[np.array(maximum_patch_indices)].astype(int)]
-        #xy_coords_list_for_frames = best_patch_after_nms
-        iter = maximum_patch_indices
-        print(iter)
-
-        print(sort_list)
+        iter_elements = maximum_patch_indices
 
     heatmap = np.ones((3312, 2037))
 
@@ -113,42 +132,14 @@ def create_heatmap(im_arr, sorted_dict, x_l, y_l, xy_coords_list_for_frames, x_s
 
     xy_coords_list_for_frames = np.array(xy_coords_list_for_frames)
 
-
-    for i in iter:
+    for i in iter_elements:
         for y in range(xy_coords_list_for_frames[i, 1], xy_coords_list_for_frames[i, 1] + y_l + 1):
             for x in range(xy_coords_list_for_frames[i, 0], xy_coords_list_for_frames[i, 0] + x_l + 1):
                 if (not y >= 3310) and (not x >= 2035):
                     heatmap[y, x] += abs(sort_list[i] - max_value)
 
-    #heatmap = np.absolute(heatmap - heatmap.max())
 
-    heatmap = normalize_heatmap_border(heatmap, x_l, y_l, min_value)
-
-    korr = (x_l / x_step) * (y_l / y_step) * (sort_list.min() + 1.)
-
-    plt.imshow(heatmap, cmap='jet', interpolation='sinc', alpha=0.7, vmin=heatmap.max() / 2, vmax=heatmap.max())
+    plt.imshow(heatmap, cmap='jet', interpolation='sinc', alpha=0.7, vmin=heatmap.min(), vmax=heatmap.max())
 
     plt.show()
 
-
-def normalize_heatmap_border(heatmap, x_l, y_l, min_value):
-    mean_heat = heatmap.mean()
-    for y in range(0, len(heatmap)):
-        for x in range(0, x_l):
-            heatmap[y, x] = min_value
-
-    for y in range(0, len(heatmap)):
-        for x in range(len(heatmap[0]) - x_l, len(heatmap[0])):
-            heatmap[y, x] = min_value
-
-    for y in range(0, y_l):
-    #for y in range(0, 300):
-        for x in range(0, len(heatmap[0])):
-            heatmap[y, x] = min_value
-
-    #for y in range(len(heatmap) - y_l, len(heatmap)):
-    for y in (1000, len(heatmap) - 1):
-        for x in range(0, len(heatmap[0])):
-            heatmap[y, x] = min_value
-
-    return heatmap

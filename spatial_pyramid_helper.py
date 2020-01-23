@@ -9,7 +9,7 @@ def append_histograms(row):
 def calculate_spatial_pyramid_histogram(histogram):
     arr1, arr2 = np.array_split(histogram, 2)
     extended_histogram = np.concatenate((histogram, arr1, arr2))
-    print(extended_histogram)
+    #print(extended_histogram)
     return extended_histogram
 
 

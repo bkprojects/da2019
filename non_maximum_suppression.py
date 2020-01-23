@@ -38,5 +38,3 @@ def suppress_non_maximum_patches(patch_array):
 
     return maximum_patch_indices
 
-
-
