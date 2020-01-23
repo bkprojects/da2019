@@ -80,8 +80,8 @@ def calc_mean_average_precision(n_centroids, gtp_dict,  frames, labels):
     for key in gtp_dict:
         key_list = gtp_dict[key]
         for x1,y1,x2,y2 in key_list:
-            print('Wort: %s %s' % key)
-            print('Mit Koordinaten: %s,%s,%s,%s' % x1,y1,x2,y2)
+            print('Wort: %s' % key)
+            print('Mit Koordinaten: %s,%s,%s,%s' % (x1, y1, x2, y2))
             average, _ = find_similar_words(frames, n_centroids, labels, (x1,y1,x2,y2), key_list)
             sum_of_averages += average
 
