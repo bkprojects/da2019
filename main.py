@@ -37,7 +37,7 @@ def patch_wordspotting():
 
     # ------------------
     step_size = 15
-    cell_size = 15
+    cell_size = 5
     # ------------------
 
     # Select Image and SIFT file
@@ -45,7 +45,7 @@ def patch_wordspotting():
     frames, desc = pickle.load(open(pickle_densesift_fn, 'rb'))
 
     # ---------------
-    n_centroids = 1024
+    n_centroids = 512
     # ---------------
 
     # kmeans über dem gesamten dokument
@@ -76,16 +76,32 @@ def patch_wordspotting():
 def calc_mean_average_precision(n_centroids, gtp_dict,  frames, labels):
 
     sum_of_averages = 0
+    current_word_index = 0
+
+    count_all_elements = []
+    for x in gtp_dict.values():
+        count_all_elements = count_all_elements + x
 
     for key in gtp_dict:
         key_list = gtp_dict[key]
         for x1,y1,x2,y2 in key_list:
+            print(' ')
             print('Wort: %s' % key)
             print('Mit Koordinaten: %s,%s,%s,%s' % (x1, y1, x2, y2))
+            print('Fortschritt: Wort %s von %s' % (current_word_index, len(count_all_elements)))
+            print(' ')
+            current_word_index += 1
             average, _ = find_similar_words(frames, n_centroids, labels, (x1,y1,x2,y2), key_list)
             sum_of_averages += average
 
-    mean_average = sum_of_averages / len(gtp_dict.values())
+            print(' ')
+            mean_average_temp = sum_of_averages / current_word_index
+            print('Zwischenzeitlich: Mean Average Precision: %s' % mean_average_temp)
+            print(' ')
+            print('---------------------------------------------')
+
+
+    mean_average = sum_of_averages / count_all_elements
 
     return mean_average
 
@@ -100,7 +116,6 @@ def find_similar_words(frames, n_centroids, labels, coordinates,sample_coodinate
     # Selected word: -- 580 319 723 406 the --
     word_x1, word_y1, word_x2, word_y2 = coordinates
 
-
     # x/y value fürs iterieren
     x = 0
     y = 0
@@ -112,12 +127,9 @@ def find_similar_words(frames, n_centroids, labels, coordinates,sample_coodinate
     # -------------------
 
 
-    # for testing
-    #height = 1200
-
     # -----------------
-    x_step = round(x_length/4)
-    y_step = round(y_length/2)
+    x_step = round(x_length/8)
+    y_step = round(y_length/3)
     # -----------------
 
 
@@ -165,7 +177,9 @@ def find_similar_words(frames, n_centroids, labels, coordinates,sample_coodinate
     print('Patches berechnet')
 
     # Transformation desc_list (Descriptoren) in Histogramme
-    histogram_list = calc_histogramms(desc_list, n_centroids)
+    #histogram_list = calc_histogramms(desc_list, n_centroids)
+    desc_list = np.array(desc_list)
+    histogram_list = np.array([np.bincount(x, minlength=n_centroids) for x in desc_list])
 
     if result_with_sp:
         print('Berechne Spatial Pyramid')

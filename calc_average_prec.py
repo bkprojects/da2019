@@ -24,7 +24,7 @@ def calc_average_precision(best_patch_after_nms, gtp_list, x_l, y_l):
     calc_av_mean = 0.
     for i in range(len(result_list)):
         try:
-            calc_av_mean += (sum(result_list[:i]) / i + 1 ) * result_list[i]
+            calc_av_mean += (sum(result_list[:i+1]) / (i + 1)) * result_list[i]
         except:
             pass
 
